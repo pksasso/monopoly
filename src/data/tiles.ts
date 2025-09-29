@@ -89,7 +89,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 1,
-    name: 'Mediterranean Avenue',
+    name: 'Botanic Gardens',
     type: 'property',
     colorGroup: 'Brown',
     cost: 60,
@@ -103,7 +103,7 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 160,
       hotel: 250
     },
-    displayColor: 0x8b4513
+    displayColor: 0x955235
   },
   {
     id: 2,
@@ -114,7 +114,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 3,
-    name: 'Baltic Avenue',
+    name: 'Oran Mor',
     type: 'property',
     colorGroup: 'Brown',
     cost: 60,
@@ -128,7 +128,7 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 320,
       hotel: 450
     },
-    displayColor: 0x8b4513
+    displayColor: 0x955235
   },
   {
     id: 4,
@@ -140,7 +140,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 5,
-    name: 'Reading Railroad',
+    name: 'St Enoch Underground',
     type: 'railroad',
     cost: 200,
     rent: {
@@ -153,7 +153,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 6,
-    name: 'Oriental Avenue',
+    name: 'Richmond Street',
     type: 'property',
     colorGroup: 'Light Blue',
     cost: 100,
@@ -167,7 +167,7 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 400,
       hotel: 550
     },
-    displayColor: 0xadd8e6
+    displayColor: 0xAAE0FA
   },
   {
     id: 7,
@@ -178,7 +178,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 8,
-    name: 'Vermont Avenue',
+    name: 'Kelvingrove',
     type: 'property',
     colorGroup: 'Light Blue',
     cost: 100,
@@ -192,11 +192,11 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 400,
       hotel: 550
     },
-    displayColor: 0xadd8e6
+    displayColor: 0xAAE0FA
   },
   {
     id: 9,
-    name: 'Connecticut Avenue',
+    name: 'The Lighthouse',
     type: 'property',
     colorGroup: 'Light Blue',
     cost: 120,
@@ -210,7 +210,7 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 450,
       hotel: 600
     },
-    displayColor: 0xadd8e6
+    displayColor: 0xAAE0FA
   },
   {
     id: 10,
@@ -221,7 +221,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 11,
-    name: 'St. Charles Place',
+    name: 'Celtic Park',
     type: 'property',
     colorGroup: 'Pink',
     cost: 140,
@@ -235,23 +235,24 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 625,
       hotel: 750
     },
-    displayColor: 0xff69b4
+    displayColor: 0xD93A96
   },
   {
     id: 12,
-    name: 'Electric Company',
+    name: 'Irn Bru',
     type: 'utility',
     cost: 150,
     rentMultiplier: {
       oneUtility: 4,
       bothUtilities: 10
     },
-    description: 'Pagamento baseado no resultado dos dados.',
+    description:
+      'If one Utility is owned, rent is 4x the amount shown on dice. If both Utilities are owned, rent is 10x the amount shown on dice.',
     displayColor: 0xffffff
   },
   {
     id: 13,
-    name: 'States Avenue',
+    name: 'Argyle Street',
     type: 'property',
     colorGroup: 'Pink',
     cost: 140,
@@ -265,11 +266,11 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 625,
       hotel: 750
     },
-    displayColor: 0xff69b4
+    displayColor: 0xD93A96
   },
   {
     id: 14,
-    name: 'Virginia Avenue',
+    name: 'Hampden Park',
     type: 'property',
     colorGroup: 'Pink',
     cost: 160,
@@ -283,11 +284,11 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 700,
       hotel: 900
     },
-    displayColor: 0xff69b4
+    displayColor: 0xD93A96
   },
   {
     id: 15,
-    name: 'Pennsylvania Railroad',
+    name: 'Queen Street Station',
     type: 'railroad',
     cost: 200,
     rent: {
@@ -300,7 +301,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 16,
-    name: 'St. James Place',
+    name: 'Buchanan Street',
     type: 'property',
     colorGroup: 'Orange',
     cost: 180,
@@ -314,7 +315,7 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 750,
       hotel: 950
     },
-    displayColor: 0xffa500
+    displayColor: 0xF7941D
   },
   {
     id: 17,
@@ -325,7 +326,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 18,
-    name: 'Tennessee Avenue',
+    name: 'Byres Road',
     type: 'property',
     colorGroup: 'Orange',
     cost: 180,
@@ -339,11 +340,11 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 750,
       hotel: 950
     },
-    displayColor: 0xffa500
+    displayColor: 0xF7941D
   },
   {
     id: 19,
-    name: 'New York Avenue',
+    name: 'Howard Street',
     type: 'property',
     colorGroup: 'Orange',
     cost: 200,
@@ -357,7 +358,7 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 800,
       hotel: 1000
     },
-    displayColor: 0xffa500
+    displayColor: 0xF7941D
   },
   {
     id: 20,
@@ -368,7 +369,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 21,
-    name: 'Kentucky Avenue',
+    name: 'Auchentoshan Distillery',
     type: 'property',
     colorGroup: 'Red',
     cost: 220,
@@ -382,7 +383,7 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 875,
       hotel: 1050
     },
-    displayColor: 0xff0000
+    displayColor: 0xF11C26
   },
   {
     id: 22,
@@ -393,7 +394,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 23,
-    name: 'Indiana Avenue',
+    name: 'Duke Street',
     type: 'property',
     colorGroup: 'Red',
     cost: 220,
@@ -407,11 +408,11 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 875,
       hotel: 1050
     },
-    displayColor: 0xff0000
+    displayColor: 0xF11C26
   },
   {
     id: 24,
-    name: 'Illinois Avenue',
+    name: 'Gallowgate',
     type: 'property',
     colorGroup: 'Red',
     cost: 240,
@@ -425,11 +426,11 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 925,
       hotel: 1100
     },
-    displayColor: 0xff0000
+    displayColor: 0xF11C26
   },
   {
     id: 25,
-    name: 'B. & O. Railroad',
+    name: 'Buchanan Bus Station',
     type: 'railroad',
     cost: 200,
     rent: {
@@ -442,7 +443,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 26,
-    name: 'Atlantic Avenue',
+    name: 'Bath Street',
     type: 'property',
     colorGroup: 'Yellow',
     cost: 260,
@@ -456,11 +457,11 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 975,
       hotel: 1150
     },
-    displayColor: 0xfff44f
+    displayColor: 0xFEF200
   },
   {
     id: 27,
-    name: 'Ventnor Avenue',
+    name: 'Sauchiehall Street',
     type: 'property',
     colorGroup: 'Yellow',
     cost: 260,
@@ -474,23 +475,24 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 975,
       hotel: 1150
     },
-    displayColor: 0xfff44f
+    displayColor: 0xFEF200
   },
   {
     id: 28,
-    name: 'Water Works',
+    name: 'Figma',
     type: 'utility',
     cost: 150,
     rentMultiplier: {
       oneUtility: 4,
       bothUtilities: 10
     },
-    description: 'Pagamento baseado no resultado dos dados.',
+    description:
+      'If one Utility is owned, rent is 4x the amount shown on dice. If both Utilities are owned, rent is 10x the amount shown on dice.',
     displayColor: 0xffffff
   },
   {
     id: 29,
-    name: 'Marvin Gardens',
+    name: 'St Vincent Street',
     type: 'property',
     colorGroup: 'Yellow',
     cost: 280,
@@ -504,7 +506,7 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1025,
       hotel: 1200
     },
-    displayColor: 0xfff44f
+    displayColor: 0xFEF200
   },
   {
     id: 30,
@@ -515,7 +517,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 31,
-    name: 'Pacific Avenue',
+    name: 'West Regent Street',
     type: 'property',
     colorGroup: 'Green',
     cost: 300,
@@ -529,11 +531,11 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1100,
       hotel: 1275
     },
-    displayColor: 0x008000
+    displayColor: 0x1FB25A
   },
   {
     id: 32,
-    name: 'North Carolina Avenue',
+    name: 'Charing Cross',
     type: 'property',
     colorGroup: 'Green',
     cost: 300,
@@ -547,7 +549,7 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1100,
       hotel: 1275
     },
-    displayColor: 0x008000
+    displayColor: 0x1FB25A
   },
   {
     id: 33,
@@ -558,7 +560,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 34,
-    name: 'Pennsylvania Avenue',
+    name: 'Bothwell Street',
     type: 'property',
     colorGroup: 'Green',
     cost: 320,
@@ -572,11 +574,11 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1200,
       hotel: 1400
     },
-    displayColor: 0x008000
+    displayColor: 0x1FB25A
   },
   {
     id: 35,
-    name: 'Short Line',
+    name: 'Central Station',
     type: 'railroad',
     cost: 200,
     rent: {
@@ -596,7 +598,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 37,
-    name: 'Park Place',
+    name: 'George Square',
     type: 'property',
     colorGroup: 'Dark Blue',
     cost: 350,
@@ -610,7 +612,7 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1300,
       hotel: 1500
     },
-    displayColor: 0x0000ff
+    displayColor: 0x0072BB
   },
   {
     id: 38,
@@ -622,7 +624,7 @@ export const MONOPOLY_TILES: Tile[] = [
   },
   {
     id: 39,
-    name: 'Boardwalk',
+    name: 'Pollok Country Park',
     type: 'property',
     colorGroup: 'Dark Blue',
     cost: 400,
@@ -636,6 +638,6 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1700,
       hotel: 2000
     },
-    displayColor: 0x0000ff
+    displayColor: 0x0072BB
   }
 ];

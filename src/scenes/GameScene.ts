@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import boardTexture from '../assets/board.png';
 import { MONOPOLY_TILES, Tile } from '../data/tiles';
 import { BoardRenderer } from '../board/BoardRenderer';
 import { TokenController } from '../board/TokenController';
@@ -28,6 +29,10 @@ export default class GameScene extends Phaser.Scene {
 
   private isMoving = false;
 
+  preload(): void {
+    this.load.image('board', boardTexture);
+  }
+
   create(data: SceneData = {}): void {
     this.activeTileIndex = data.activeTileIndex ?? 0;
     this.currentTile = MONOPOLY_TILES[this.activeTileIndex];
@@ -40,7 +45,7 @@ export default class GameScene extends Phaser.Scene {
     );
 
     this.boardRenderer = new BoardRenderer({ scene: this, metrics });
-    this.boardRenderer.render(MONOPOLY_TILES);
+    this.boardRenderer.render();
 
     this.infoPanel = new InfoPanel({
       scene: this,
