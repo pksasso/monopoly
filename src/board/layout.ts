@@ -1,4 +1,4 @@
-import { TilePosition } from './types';
+import { TileOrientation, TilePosition } from './types';
 
 export interface BoardMetrics {
   boardSize: number;
@@ -6,6 +6,71 @@ export interface BoardMetrics {
   offsetX: number;
   offsetY: number;
 }
+
+const BOARD_PIXEL_SIZE = 5503;
+const GRID_PIXEL_BOUNDARIES = [
+  14,
+  735,
+  1183,
+  1631,
+  2079,
+  2527,
+  2975,
+  3423,
+  3871,
+  4319,
+  4767,
+  5488
+];
+
+const GRID_FRACTIONS = GRID_PIXEL_BOUNDARIES.map((value) => value / BOARD_PIXEL_SIZE);
+
+const fractionalCenter = (index: number): number =>
+  (GRID_FRACTIONS[index] + GRID_FRACTIONS[index + 1]) * 0.5;
+
+const PROPERTY_WIDTH_RATIO = (GRID_PIXEL_BOUNDARIES[2] - GRID_PIXEL_BOUNDARIES[1]) / BOARD_PIXEL_SIZE;
+
+const tileCenterFractions = (() => {
+  const positions: Array<{ x: number; y: number; orientation: TileOrientation }> = [];
+
+  const bottomY = fractionalCenter(10);
+  for (let i = 0; i <= 10; i += 1) {
+    positions.push({
+      x: fractionalCenter(10 - i),
+      y: bottomY,
+      orientation: 'bottom'
+    });
+  }
+
+  const leftX = fractionalCenter(0);
+  for (let i = 1; i <= 9; i += 1) {
+    positions.push({
+      x: leftX,
+      y: fractionalCenter(10 - i),
+      orientation: 'left'
+    });
+  }
+
+  const topY = fractionalCenter(0);
+  for (let i = 0; i <= 10; i += 1) {
+    positions.push({
+      x: fractionalCenter(i),
+      y: topY,
+      orientation: 'top'
+    });
+  }
+
+  const rightX = fractionalCenter(10);
+  for (let i = 1; i <= 9; i += 1) {
+    positions.push({
+      x: rightX,
+      y: fractionalCenter(i),
+      orientation: 'right'
+    });
+  }
+
+  return positions;
+})();
 
 export const computeBoardMetrics = (
   canvasWidth: number,
@@ -24,52 +89,18 @@ export const computeBoardMetrics = (
   }
 
   const offsetY = (canvasHeight - boardSize) / 2;
-  const tileSize = boardSize / 11;
+  const tileSize = boardSize * PROPERTY_WIDTH_RATIO;
 
   return { boardSize, tileSize, offsetX, offsetY };
 };
 
 export const computeTilePositions = (
   boardSize: number,
-  tileSize: number,
   offsetX: number,
   offsetY: number
-): TilePosition[] => {
-  const positions: TilePosition[] = [];
-  const startX = offsetX + boardSize - tileSize * 0.5;
-  const startY = offsetY + boardSize - tileSize * 0.5;
-
-  for (let i = 0; i < 11; i += 1) {
-    positions.push({
-      x: startX - i * tileSize,
-      y: startY,
-      orientation: 'bottom'
-    });
-  }
-
-  for (let i = 1; i < 10; i += 1) {
-    positions.push({
-      x: offsetX + tileSize * 0.5,
-      y: startY - i * tileSize,
-      orientation: 'left'
-    });
-  }
-
-  for (let i = 0; i < 11; i += 1) {
-    positions.push({
-      x: offsetX + tileSize * 0.5 + i * tileSize,
-      y: offsetY + tileSize * 0.5,
-      orientation: 'top'
-    });
-  }
-
-  for (let i = 1; i < 10; i += 1) {
-    positions.push({
-      x: startX,
-      y: offsetY + tileSize * 0.5 + i * tileSize,
-      orientation: 'right'
-    });
-  }
-
-  return positions;
-};
+): TilePosition[] =>
+  tileCenterFractions.map(({ x, y, orientation }) => ({
+    x: offsetX + x * boardSize,
+    y: offsetY + y * boardSize,
+    orientation
+  }));
