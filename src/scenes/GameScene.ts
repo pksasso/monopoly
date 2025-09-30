@@ -3,9 +3,11 @@ import boardTexture from '../assets/board.png';
 import { MONOPOLY_TILES, Tile } from '../data/tiles';
 import { BoardRenderer } from '../board/BoardRenderer';
 import { TokenController } from '../board/TokenController';
+import { TileHoverPreview } from '../board/TileHoverPreview';
 import { computeBoardMetrics } from '../board/layout';
 import { DicePanel } from '../ui/DicePanel';
 import { InfoPanel } from '../ui/InfoPanel';
+import { preloadPropertyCards } from '../assets/propertyCards';
 
 const PANEL_WIDTH = 220;
 const PANEL_MARGIN = 40;
@@ -23,6 +25,8 @@ export default class GameScene extends Phaser.Scene {
 
   private infoPanel!: InfoPanel;
 
+  private tileHoverPreview!: TileHoverPreview;
+
   private currentTile: Tile = MONOPOLY_TILES[0];
 
   private activeTileIndex = 0;
@@ -31,6 +35,7 @@ export default class GameScene extends Phaser.Scene {
 
   preload(): void {
     this.load.image('board', boardTexture);
+    preloadPropertyCards(this.load, MONOPOLY_TILES);
   }
 
   create(data: SceneData = {}): void {
@@ -46,6 +51,14 @@ export default class GameScene extends Phaser.Scene {
 
     this.boardRenderer = new BoardRenderer({ scene: this, metrics });
     this.boardRenderer.render();
+
+    this.tileHoverPreview = new TileHoverPreview({
+      scene: this,
+      tiles: MONOPOLY_TILES,
+      tilePositions: this.boardRenderer.getTilePositions(),
+      tileSize: metrics.tileSize
+    });
+    this.tileHoverPreview.create();
 
     this.infoPanel = new InfoPanel({
       scene: this,
