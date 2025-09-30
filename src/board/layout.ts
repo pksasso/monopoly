@@ -80,18 +80,18 @@ export const computeBoardMetrics = (
 ): BoardMetrics => {
   const maxBoardWidth = canvasWidth - (panelWidth + panelMargin * 2 + 20);
   const maxBoardHeight = canvasHeight * 0.9;
-  const boardSize = Math.min(maxBoardWidth, maxBoardHeight);
+  const boardSize = Math.round(Math.min(maxBoardWidth, maxBoardHeight));
 
   let offsetX = panelMargin;
   const availableRight = canvasWidth - (offsetX + boardSize + panelWidth + panelMargin);
   if (availableRight < 0) {
-    offsetX = Math.max(panelMargin, offsetX + availableRight);
+    offsetX = Math.max(panelMargin, Math.round(offsetX + availableRight));
   }
 
-  const offsetY = (canvasHeight - boardSize) / 2;
-  const tileSize = boardSize * PROPERTY_WIDTH_RATIO;
+  const offsetY = Math.round((canvasHeight - boardSize) / 2);
+  const tileSize = Math.round(boardSize * PROPERTY_WIDTH_RATIO);
 
-  return { boardSize, tileSize, offsetX, offsetY };
+  return { boardSize, tileSize, offsetX: Math.round(offsetX), offsetY };
 };
 
 export const computeTilePositions = (
@@ -100,7 +100,7 @@ export const computeTilePositions = (
   offsetY: number
 ): TilePosition[] =>
   tileCenterFractions.map(({ x, y, orientation }) => ({
-    x: offsetX + x * boardSize,
-    y: offsetY + y * boardSize,
+    x: Math.round(offsetX + x * boardSize),
+    y: Math.round(offsetY + y * boardSize),
     orientation
   }));

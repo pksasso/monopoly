@@ -8,6 +8,7 @@ interface DicePanelConfig {
   panelHeight: number;
   onRollFinished: (dieOne: number, dieTwo: number) => void;
   canRoll?: () => boolean;
+  uiScale?: number;
 }
 
 export class DicePanel {
@@ -33,11 +34,32 @@ export class DicePanel {
 
   private diceAnimationEvent: Phaser.Time.TimerEvent | null = null;
 
-  private readonly diceSize = 90;
+  private readonly baseDiceSize = 150;
+
+  private diceSize = 90;
 
   private rolling = false;
 
-  constructor({ scene, panelX, panelY, panelWidth, panelHeight, onRollFinished, canRoll }: DicePanelConfig) {
+  private readonly uiScale: number;
+
+  private readonly panelPadding: number;
+
+  private readonly innerWidth: number;
+
+  private innerLeft = 0;
+
+  private innerRight = 0;
+
+  constructor({
+    scene,
+    panelX,
+    panelY,
+    panelWidth,
+    panelHeight,
+    onRollFinished,
+    canRoll,
+    uiScale = 1
+  }: DicePanelConfig) {
     this.scene = scene;
     this.panelX = panelX;
     this.panelY = panelY;
@@ -45,27 +67,71 @@ export class DicePanel {
     this.panelHeight = panelHeight;
     this.onRollFinished = onRollFinished;
     this.canRoll = canRoll;
+    this.uiScale = uiScale;
+    this.panelPadding = Math.round(24 * Math.min(this.uiScale, 2.4));
+    this.innerWidth = Math.max(
+      this.panelWidth - this.panelPadding * 2,
+      Math.max(160, Math.round(this.panelWidth * 0.55))
+    );
+    this.diceSize = this.computeDiceSize();
+  }
+
+  private computeDiceSize(): number {
+    const minSize = Math.max(96, Math.round(120 * Math.min(this.uiScale, 1.4)));
+    const spacingExtra = Math.round(32 * Math.min(this.uiScale, 2.3));
+    const rawMax = Math.floor((this.innerWidth - spacingExtra) / 2);
+    const maxSize = Math.max(minSize, rawMax);
+    const desired = Math.round(this.baseDiceSize * Math.min(this.uiScale, 2.4));
+    return Phaser.Math.Clamp(desired, minSize, maxSize);
   }
 
   create(): void {
-    const panelCenterX = this.panelX + this.panelWidth / 2;
+    const innerLeft = this.panelX + this.panelPadding;
+    const innerRight = innerLeft + this.innerWidth;
+    const innerTop = this.panelY + this.panelPadding;
+    const innerBottom = this.panelY + this.panelHeight - this.panelPadding;
+
+    this.innerLeft = innerLeft;
+    this.innerRight = innerRight;
+
+    const panelCenterX = innerLeft + this.innerWidth / 2;
+    const textResolution = Math.min(window.devicePixelRatio || 1, 2);
 
     this.scene.add
-      .rectangle(this.panelX + this.panelWidth / 2, this.panelY + this.panelHeight / 2, this.panelWidth, this.panelHeight, 0xf7f2e9, 0.98)
+      .rectangle(
+        Math.round(this.panelX + this.panelWidth / 2),
+        Math.round(this.panelY + this.panelHeight / 2),
+        Math.round(this.panelWidth),
+        Math.round(this.panelHeight),
+        0xf7f2e9,
+        0.98
+      )
       .setStrokeStyle(2, 0x999999, 0.8);
 
+    const buttonX = Math.round(panelCenterX);
+    const buttonHeight = Math.max(72, Math.round(76 * Math.min(this.uiScale, 2.4)));
+    const buttonY = Math.round(innerTop + buttonHeight / 2);
+    const scaledButtonWidth = Math.round((this.innerWidth - 24) * Math.min(this.uiScale, 1.9));
+    const maxButtonWidth = Math.round(this.innerWidth - Math.max(24, this.panelPadding * 0.4));
+    const buttonWidth = Phaser.Math.Clamp(
+      scaledButtonWidth,
+      Math.min(240, maxButtonWidth),
+      maxButtonWidth
+    );
+
     this.rollButton = this.scene.add
-      .rectangle(panelCenterX, this.panelY + 80, this.panelWidth - 40, 60, 0x1e6f5c, 1)
+      .rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x1e6f5c, 1)
       .setStrokeStyle(2, 0x0b3b2e, 1)
       .setInteractive({ useHandCursor: true });
 
     this.scene.add
-      .text(panelCenterX, this.panelY + 80, 'Jogar Dados', {
+      .text(buttonX, buttonY, 'Jogar Dados', {
         fontFamily: 'sans-serif',
-        fontSize: '20px',
+        fontSize: `${Math.round(30 * Math.min(this.uiScale, 2.4))}px`,
         color: '#ffffff'
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setResolution(textResolution);
 
     this.rollButton.on('pointerover', () => {
       if (!this.rolling) {
@@ -75,15 +141,31 @@ export class DicePanel {
     this.rollButton.on('pointerout', () => this.rollButton.setFillStyle(0x1e6f5c));
     this.rollButton.on('pointerdown', () => this.requestRoll());
 
-    this.initializeDiceDisplay(panelCenterX);
+    const buttonBottom = buttonY + buttonHeight / 2;
+    const diceSpacingY = Math.max(36, this.panelPadding * 0.8);
+    const desiredDiceCenter = buttonBottom + diceSpacingY + this.diceSize / 2;
+    const maxDiceCenter = innerBottom - this.diceSize / 2 - Math.max(36, this.panelPadding * 0.7);
+    const diceCenterY = Phaser.Math.Clamp(
+      desiredDiceCenter,
+      buttonBottom + diceSpacingY,
+      Math.max(buttonBottom + diceSpacingY, maxDiceCenter)
+    );
+
+    this.initializeDiceDisplay(panelCenterX, diceCenterY);
+
+    const hintSpacing = Math.max(32, this.panelPadding * 0.7);
+    const desiredHint = diceCenterY + this.diceSize / 2 + hintSpacing;
+    const maxHint = innerBottom - Math.max(20, this.panelPadding * 0.35);
+    const hintY = Math.min(desiredHint, maxHint);
 
     this.scene.add
-      .text(panelCenterX, this.panelY + 360, 'Atalho: tecla Espaço', {
+      .text(Math.round(panelCenterX), hintY, 'Atalho: tecla Espaço', {
         fontFamily: 'sans-serif',
-        fontSize: '14px',
+        fontSize: `${Math.round(20 * Math.min(this.uiScale, 2.4))}px`,
         color: '#555555'
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setResolution(textResolution);
   }
 
   isRolling(): boolean {
@@ -111,13 +193,39 @@ export class DicePanel {
     });
   }
 
-  private initializeDiceDisplay(panelCenterX: number): void {
-    const diceSpacing = this.diceSize + 20;
-    const diceY = this.panelY + 220;
+  private initializeDiceDisplay(panelCenterX: number, diceCenterY: number): void {
+    const diceMargin = Math.round(
+      Math.min(this.innerWidth / 6, 28 * Math.min(this.uiScale, 2.4))
+    );
+
+    let leftCenter = this.innerLeft + this.diceSize / 2 + diceMargin;
+    let rightCenter = this.innerRight - this.diceSize / 2 - diceMargin;
+
+    if (rightCenter - leftCenter < this.diceSize * 0.6) {
+      const offset = this.diceSize * 0.6;
+      leftCenter = panelCenterX - offset;
+      rightCenter = panelCenterX + offset;
+    }
+
+    leftCenter = Phaser.Math.Clamp(
+      leftCenter,
+      this.innerLeft + this.diceSize / 2,
+      this.innerRight - this.diceSize / 2
+    );
+    rightCenter = Phaser.Math.Clamp(
+      rightCenter,
+      this.innerLeft + this.diceSize / 2,
+      this.innerRight - this.diceSize / 2
+    );
+
+    if (rightCenter - leftCenter < this.diceSize * 0.4) {
+      leftCenter = panelCenterX - this.diceSize * 0.5;
+      rightCenter = panelCenterX + this.diceSize * 0.5;
+    }
 
     this.diceCenters = [
-      { x: panelCenterX - diceSpacing / 2, y: diceY },
-      { x: panelCenterX + diceSpacing / 2, y: diceY }
+      { x: Math.round(leftCenter), y: Math.round(diceCenterY) },
+      { x: Math.round(rightCenter), y: Math.round(diceCenterY) }
     ];
 
     this.diceGraphics = [this.scene.add.graphics(), this.scene.add.graphics()];
@@ -161,20 +269,23 @@ export class DicePanel {
     graphics.clear();
 
     const halfSize = this.diceSize / 2;
-    const radius = 12;
+    const radius = Math.round(Math.min(this.diceSize * 0.18, 28));
+    const rectX = Math.round(center.x - halfSize);
+    const rectY = Math.round(center.y - halfSize);
 
     graphics.fillStyle(0xffffff, 1);
     graphics.fillRoundedRect(
-      center.x - halfSize,
-      center.y - halfSize,
+      rectX,
+      rectY,
       this.diceSize,
       this.diceSize,
       radius
     );
-    graphics.lineStyle(3, 0x222222, 1);
+    const borderWidth = Math.max(3, Math.round(3 * Math.min(this.uiScale, 2)));
+    graphics.lineStyle(borderWidth, 0x222222, 1);
     graphics.strokeRoundedRect(
-      center.x - halfSize,
-      center.y - halfSize,
+      rectX,
+      rectY,
       this.diceSize,
       this.diceSize,
       radius
@@ -188,13 +299,13 @@ export class DicePanel {
     const pipRadius = this.diceSize * 0.07;
 
     const pipPositions = {
-      center: { x: center.x, y: center.y },
-      topLeft: { x: center.x - offset, y: center.y - offset },
-      topRight: { x: center.x + offset, y: center.y - offset },
-      midLeft: { x: center.x - offset, y: center.y },
-      midRight: { x: center.x + offset, y: center.y },
-      bottomLeft: { x: center.x - offset, y: center.y + offset },
-      bottomRight: { x: center.x + offset, y: center.y + offset }
+      center: { x: Math.round(center.x), y: Math.round(center.y) },
+      topLeft: { x: Math.round(center.x - offset), y: Math.round(center.y - offset) },
+      topRight: { x: Math.round(center.x + offset), y: Math.round(center.y - offset) },
+      midLeft: { x: Math.round(center.x - offset), y: Math.round(center.y) },
+      midRight: { x: Math.round(center.x + offset), y: Math.round(center.y) },
+      bottomLeft: { x: Math.round(center.x - offset), y: Math.round(center.y + offset) },
+      bottomRight: { x: Math.round(center.x + offset), y: Math.round(center.y + offset) }
     } as const;
 
     const layoutMap: Record<number, Array<keyof typeof pipPositions>> = {

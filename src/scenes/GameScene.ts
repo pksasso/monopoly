@@ -42,12 +42,28 @@ export default class GameScene extends Phaser.Scene {
     this.activeTileIndex = data.activeTileIndex ?? 0;
     this.currentTile = MONOPOLY_TILES[this.activeTileIndex];
 
-    const metrics = computeBoardMetrics(
-      this.scale.width,
-      this.scale.height,
-      PANEL_WIDTH,
-      PANEL_MARGIN
+    const scaleManager = this.scale;
+    const displaySize = scaleManager.displaySize;
+    const dpr = window.devicePixelRatio || 1;
+    const canvasWidth = displaySize ? displaySize.width : scaleManager.width / dpr;
+    const canvasHeight = displaySize ? displaySize.height : scaleManager.height / dpr;
+
+    const deviceScale = window.devicePixelRatio || 1;
+    const overrideScale = window.monopolyUiScaleOverride;
+    const baseScale = deviceScale > 1.1 ? deviceScale * 1.9 : 1.6;
+    const uiScale = Math.min(
+      Math.max(
+        typeof overrideScale === 'number' && overrideScale > 0 ? overrideScale : baseScale,
+        1.5
+      ),
+      3.2
     );
+    window.monopolyUiScale = uiScale;
+
+    const panelScale = Math.min(uiScale * 1.2, 3);
+    const panelWidth = Math.max(PANEL_WIDTH * 1.4, PANEL_WIDTH * panelScale);
+
+    const metrics = computeBoardMetrics(canvasWidth, canvasHeight, panelWidth, PANEL_MARGIN);
 
     this.boardRenderer = new BoardRenderer({ scene: this, metrics });
     this.boardRenderer.render();
@@ -65,7 +81,8 @@ export default class GameScene extends Phaser.Scene {
       boardCenterX: metrics.offsetX + metrics.boardSize * 0.5,
       boardTopY: metrics.offsetY,
       boardBottomY: metrics.offsetY + metrics.boardSize,
-      boardWidth: metrics.boardSize
+      boardWidth: metrics.boardSize,
+      uiScale
     });
 
     this.tokenController = new TokenController({
@@ -81,10 +98,11 @@ export default class GameScene extends Phaser.Scene {
       scene: this,
       panelX: metrics.offsetX + metrics.boardSize + PANEL_MARGIN,
       panelY: metrics.offsetY,
-      panelWidth: PANEL_WIDTH,
+      panelWidth,
       panelHeight: metrics.boardSize,
       canRoll: () => !this.isMoving,
-      onRollFinished: (dieOne, dieTwo) => this.handleDiceResult(dieOne, dieTwo)
+      onRollFinished: (dieOne, dieTwo) => this.handleDiceResult(dieOne, dieTwo),
+      uiScale
     });
     this.dicePanel.create();
 

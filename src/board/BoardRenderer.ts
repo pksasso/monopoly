@@ -36,12 +36,12 @@ export class BoardRenderer {
 
   private drawBoardBackground(): void {
     const { boardSize, offsetX, offsetY } = this.metrics;
-    const centerX = offsetX + boardSize * 0.5;
-    const centerY = offsetY + boardSize * 0.5;
+    const centerX = Math.round(offsetX + boardSize * 0.5);
+    const centerY = Math.round(offsetY + boardSize * 0.5);
 
     this.boardImage?.destroy();
     this.boardImage = this.scene.add.image(centerX, centerY, 'board');
-    this.boardImage.setDisplaySize(boardSize, boardSize);
+    this.boardImage.setDisplaySize(Math.round(boardSize), Math.round(boardSize));
     this.boardImage.setOrigin(0.5);
   }
 }
