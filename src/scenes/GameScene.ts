@@ -8,6 +8,7 @@ import { computeBoardMetrics } from '../board/layout';
 import { DicePanel } from '../ui/DicePanel';
 import { InfoPanel } from '../ui/InfoPanel';
 import { PlayerSelectionOverlay } from '../ui/PlayerSelectionOverlay';
+import { APP_VERSION } from '../config/version';
 import { preloadPropertyCards } from '../assets/propertyCards';
 
 const PANEL_WIDTH = 600;
@@ -77,6 +78,15 @@ export default class GameScene extends Phaser.Scene {
       tileSize: metrics.tileSize
     });
     this.tileHoverPreview.create();
+
+    this.add
+      .text(12, 12, `v${APP_VERSION}`, {
+        fontFamily: 'sans-serif',
+        fontSize: '40px',
+        color: '#4a4a4a98'
+      })
+      .setOrigin(0, 0)
+      .setDepth(100);
 
     this.infoPanel = new InfoPanel({
       scene: this,
