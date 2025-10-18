@@ -35,7 +35,7 @@ export class InfoPanel {
     this.scene.add
       .text(this.boardCenterX, topTextY, 'Clique no botão ou use a barra de espaço para rolar os dados', {
         fontFamily: 'sans-serif',
-        fontSize: '18px',
+        fontSize: '34px',
         color: '#1a1a1a'
       })
       .setOrigin(0.5);
@@ -46,7 +46,7 @@ export class InfoPanel {
     this.currentTileLabel = this.scene.add
       .text(this.boardCenterX, infoY, initialDescription, {
         fontFamily: 'sans-serif',
-        fontSize: '16px',
+        fontSize: '28px',
         color: '#1a1a1a',
         align: 'center'
       })
