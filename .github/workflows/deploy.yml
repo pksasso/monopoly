@@ -36,6 +36,44 @@ jobs:
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
 
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(cat VERSION | tr -d ' \n')
+          if [ -z "$VERSION" ]; then
+            echo "Version file is empty" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create version tag
+        if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const version = '${{ steps.version.outputs.version }}';
+            const tagName = `v${version}`;
+            try {
+              await github.rest.git.getRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `tags/${tagName}`
+              });
+              core.info(`Tag ${tagName} already exists. Skipping creation.`);
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+              core.info(`Creating tag ${tagName}`);
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/tags/${tagName}`,
+                sha: context.sha
+              });
+            }
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

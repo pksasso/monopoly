@@ -27,15 +27,29 @@ export class DicePanel {
 
   private rollButton!: Phaser.GameObjects.Rectangle;
 
+  private panelBackground!: Phaser.GameObjects.Rectangle;
+
+  private accentBar!: Phaser.GameObjects.Rectangle;
+
   private diceGraphics: Phaser.GameObjects.Graphics[] = [];
 
   private diceCenters: { x: number; y: number }[] = [];
 
   private diceAnimationEvent: Phaser.Time.TimerEvent | null = null;
 
-  private readonly diceSize = 90;
+  private readonly diceSize = 130;
 
   private rolling = false;
+
+  private rollButtonBaseColor = 0x1e6f5c;
+
+  private rollButtonHoverColor = 0x218c74;
+
+  private rollButtonBorderColor = 0x0b3b2e;
+
+  private rollButtonLabel!: Phaser.GameObjects.Text;
+
+  private manualControlEnabled = true;
 
   constructor({ scene, panelX, panelY, panelWidth, panelHeight, onRollFinished, canRoll }: DicePanelConfig) {
     this.scene = scene;
@@ -50,29 +64,44 @@ export class DicePanel {
   create(): void {
     const panelCenterX = this.panelX + this.panelWidth / 2;
 
-    this.scene.add
-      .rectangle(this.panelX + this.panelWidth / 2, this.panelY + this.panelHeight / 2, this.panelWidth, this.panelHeight, 0xf7f2e9, 0.98)
-      .setStrokeStyle(2, 0x999999, 0.8);
+    this.panelBackground = this.scene.add
+      .rectangle(
+        this.panelX + this.panelWidth / 2,
+        this.panelY + this.panelHeight / 2,
+        this.panelWidth,
+        this.panelHeight,
+        0xf7f2e9,
+        0.98
+      )
+      .setStrokeStyle(3, this.rollButtonBorderColor, 0.9)
+      .setDepth(0);
+
+    this.accentBar = this.scene.add
+      .rectangle(panelCenterX, this.panelY + 30, this.panelWidth - 40, 16, this.rollButtonBaseColor, 1)
+      .setOrigin(0.5)
+      .setDepth(1);
 
     this.rollButton = this.scene.add
-      .rectangle(panelCenterX, this.panelY + 80, this.panelWidth - 40, 60, 0x1e6f5c, 1)
-      .setStrokeStyle(2, 0x0b3b2e, 1)
-      .setInteractive({ useHandCursor: true });
+      .rectangle(panelCenterX, this.panelY + 110, this.panelWidth - 40, 70, this.rollButtonBaseColor, 1)
+      .setStrokeStyle(3, this.rollButtonBorderColor, 1)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(2);
 
-    this.scene.add
-      .text(panelCenterX, this.panelY + 80, 'Jogar Dados', {
+    this.rollButtonLabel = this.scene.add
+      .text(panelCenterX, this.panelY + 110, 'Jogar Dados', {
         fontFamily: 'sans-serif',
-        fontSize: '20px',
+        fontSize: '45px',
         color: '#ffffff'
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setDepth(3);
 
     this.rollButton.on('pointerover', () => {
-      if (!this.rolling) {
-        this.rollButton.setFillStyle(0x218c74);
+      if (!this.rolling && this.manualControlEnabled) {
+        this.rollButton.setFillStyle(this.rollButtonHoverColor);
       }
     });
-    this.rollButton.on('pointerout', () => this.rollButton.setFillStyle(0x1e6f5c));
+    this.rollButton.on('pointerout', () => this.applyControlVisuals());
     this.rollButton.on('pointerdown', () => this.requestRoll());
 
     this.initializeDiceDisplay(panelCenterX);
@@ -80,10 +109,13 @@ export class DicePanel {
     this.scene.add
       .text(panelCenterX, this.panelY + 360, 'Atalho: tecla Espaço', {
         fontFamily: 'sans-serif',
-        fontSize: '14px',
+        fontSize: '24px',
         color: '#555555'
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setDepth(3);
+
+    this.setPlayerTheme(this.rollButtonBaseColor);
   }
 
   isRolling(): boolean {
@@ -91,6 +123,10 @@ export class DicePanel {
   }
 
   requestRoll(): void {
+    if (!this.manualControlEnabled) {
+      return;
+    }
+
     if (this.rolling) {
       return;
     }
@@ -99,16 +135,66 @@ export class DicePanel {
       return;
     }
 
-    const dieOneFinal = Phaser.Math.Between(1, 6);
-    const dieTwoFinal = Phaser.Math.Between(1, 6);
+    this.startRoll();
+  }
 
-    this.rolling = true;
-    this.rollButton.setFillStyle(0x1e6f5c);
+  forceRoll(): void {
+    if (this.rolling) {
+      return;
+    }
 
-    this.animateDice(dieOneFinal, dieTwoFinal, () => {
-      this.rolling = false;
-      this.onRollFinished(dieOneFinal, dieTwoFinal);
-    });
+    if (this.canRoll && !this.canRoll()) {
+      return;
+    }
+
+    this.startRoll();
+  }
+
+  setPlayerTheme(color: number): void {
+    this.rollButtonBaseColor = color;
+    this.rollButtonHoverColor = DicePanel.lightenColor(color, 0.2);
+    this.rollButtonBorderColor = DicePanel.darkenColor(color, 0.3);
+
+    const panelFillColor = DicePanel.lightenColor(color, 0.75);
+
+    if (this.rollButton) {
+      this.rollButton.setStrokeStyle(3, this.rollButtonBorderColor, 1);
+    }
+
+    if (this.rollButtonLabel) {
+      this.rollButtonLabel.setColor('#ffffff');
+      this.rollButtonLabel.setShadow(0, 2, '#000000', 0, true, true);
+    }
+
+    if (this.panelBackground) {
+      this.panelBackground.setFillStyle(panelFillColor, 0.94);
+      this.panelBackground.setStrokeStyle(3, this.rollButtonBorderColor, 0.85);
+    }
+
+    if (this.accentBar) {
+      this.accentBar.setFillStyle(this.rollButtonBaseColor, 1);
+    }
+
+    this.applyControlVisuals();
+  }
+
+  setManualControl(enabled: boolean, label?: string): void {
+    this.manualControlEnabled = enabled;
+
+    if (this.rollButton) {
+      if (enabled) {
+        this.rollButton.setInteractive({ useHandCursor: true });
+      } else {
+        this.rollButton.disableInteractive();
+      }
+    }
+
+    if (this.rollButtonLabel) {
+      const fallback = enabled ? 'Jogar Dados' : 'Lançamento Automático';
+      this.rollButtonLabel.setText(label ?? fallback);
+    }
+
+    this.applyControlVisuals();
   }
 
   private initializeDiceDisplay(panelCenterX: number): void {
@@ -213,5 +299,68 @@ export class DicePanel {
       const pip = pipPositions[key];
       graphics.fillCircle(pip.x, pip.y, pipRadius);
     });
+  }
+
+  private startRoll(): void {
+    const dieOneFinal = Phaser.Math.Between(1, 6);
+    const dieTwoFinal = Phaser.Math.Between(1, 6);
+
+    this.rolling = true;
+
+    if (this.rollButton) {
+      this.rollButton.setFillStyle(this.rollButtonBaseColor);
+    }
+
+    if (this.accentBar) {
+      this.accentBar.setFillStyle(this.rollButtonBaseColor, 1);
+    }
+
+    this.animateDice(dieOneFinal, dieTwoFinal, () => {
+      this.rolling = false;
+      this.applyControlVisuals();
+      this.onRollFinished(dieOneFinal, dieTwoFinal);
+    });
+  }
+
+  private applyControlVisuals(): void {
+    const baseColor = this.rollButtonBaseColor;
+    const disabledColor = DicePanel.lightenColor(baseColor, 0.35);
+
+    if (this.rollButton) {
+      const fillColor = this.manualControlEnabled || this.rolling ? baseColor : disabledColor;
+      this.rollButton.setFillStyle(fillColor);
+      this.rollButton.setStrokeStyle(3, this.rollButtonBorderColor, 1);
+    }
+
+    if (this.accentBar) {
+      const accentColor = this.manualControlEnabled || this.rolling
+        ? baseColor
+        : DicePanel.lightenColor(baseColor, 0.25);
+      this.accentBar.setFillStyle(accentColor, 1);
+    }
+
+    if (this.rollButtonLabel) {
+      this.rollButtonLabel.setAlpha(this.manualControlEnabled ? 1 : 0.95);
+    }
+  }
+
+  private static lightenColor(color: number, intensity: number): number {
+    const { r, g, b } = Phaser.Display.Color.IntegerToRGB(color);
+    const clamped = Phaser.Math.Clamp(intensity, 0, 1);
+    return Phaser.Display.Color.GetColor(
+      Math.round(r + (255 - r) * clamped),
+      Math.round(g + (255 - g) * clamped),
+      Math.round(b + (255 - b) * clamped)
+    );
+  }
+
+  private static darkenColor(color: number, intensity: number): number {
+    const { r, g, b } = Phaser.Display.Color.IntegerToRGB(color);
+    const clamped = Phaser.Math.Clamp(intensity, 0, 1);
+    return Phaser.Display.Color.GetColor(
+      Math.round(r * (1 - clamped)),
+      Math.round(g * (1 - clamped)),
+      Math.round(b * (1 - clamped))
+    );
   }
 }
