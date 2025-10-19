@@ -37,7 +37,7 @@ export class DicePanel {
 
   private diceAnimationEvent: Phaser.Time.TimerEvent | null = null;
 
-  private readonly diceSize = 130;
+  private readonly diceSize = 90;
 
   private rolling = false;
 
@@ -90,7 +90,7 @@ export class DicePanel {
     this.rollButtonLabel = this.scene.add
       .text(panelCenterX, this.panelY + 110, 'Jogar Dados', {
         fontFamily: 'sans-serif',
-        fontSize: '45px',
+        fontSize: '25px',
         color: '#ffffff'
       })
       .setOrigin(0.5)
@@ -109,7 +109,7 @@ export class DicePanel {
     this.scene.add
       .text(panelCenterX, this.panelY + 360, 'Atalho: tecla Espaço', {
         fontFamily: 'sans-serif',
-        fontSize: '24px',
+        fontSize: '15px',
         color: '#555555'
       })
       .setOrigin(0.5)

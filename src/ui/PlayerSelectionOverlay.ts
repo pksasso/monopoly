@@ -21,8 +21,8 @@ export class PlayerSelectionOverlay {
     this.destroy();
 
     const { width, height } = this.scene.scale;
-    const panelWidth = Math.min(1380, width * 0.92);
-    const panelHeight = Math.min(1020, height * 0.9);
+    const panelWidth = Math.min(680, width * 0.92);
+    const panelHeight = Math.min(420, height * 0.9);
     const centerX = width / 2;
     const centerY = height / 2;
 
@@ -44,7 +44,7 @@ export class PlayerSelectionOverlay {
     const title = this.scene.add
       .text(centerX, centerY - panelHeight / 2 + 110, 'Selecione quantos jogadores humanos participarão', {
         fontFamily: 'sans-serif',
-        fontSize: '55px',
+        fontSize: '25px',
         color: '#1a1a1a'
       })
       .setOrigin(0.5)
@@ -54,7 +54,7 @@ export class PlayerSelectionOverlay {
     const subtitle = this.scene.add
       .text(centerX, title.y + 70, 'Escolha de 0 a 4 jogadores humanos (os demais serão bots)', {
         fontFamily: 'sans-serif',
-        fontSize: '40px',
+        fontSize: '20px',
         color: '#4a4a4a'
       })
       .setOrigin(0.5)
@@ -62,14 +62,14 @@ export class PlayerSelectionOverlay {
     elements.push(subtitle);
 
     const buttonCounts = [0, 1, 2, 3, 4];
-    const buttonSpacing = 180;
+    const buttonSpacing = 90;
     const buttonY = centerY + 50;
 
     buttonCounts.forEach((count, index) => {
       const x = centerX + (index - (buttonCounts.length - 1) / 2) * buttonSpacing;
 
       const button = this.scene.add
-        .rectangle(x, buttonY, 190, 130, 0x1e6f5c, 1)
+        .rectangle(x, buttonY, 90, 90, 0x1e6f5c, 1)
         .setStrokeStyle(5, 0x0b3b2e, 1)
         .setInteractive({ useHandCursor: true })
         .setDepth(1001);
@@ -81,7 +81,7 @@ export class PlayerSelectionOverlay {
       const label = this.scene.add
         .text(x, buttonY, `${count}`, {
           fontFamily: 'sans-serif',
-          fontSize: '76px',
+          fontSize: '20px',
           color: '#ffffff'
         })
         .setOrigin(0.5)
@@ -93,7 +93,7 @@ export class PlayerSelectionOverlay {
     const hint = this.scene.add
       .text(centerX, centerY + panelHeight / 2 - 90, 'Você poderá alterar a quantidade reiniciando a cena.', {
         fontFamily: 'sans-serif',
-        fontSize: '38px',
+        fontSize: '17px',
         color: '#5a5a5a'
       })
       .setOrigin(0.5)

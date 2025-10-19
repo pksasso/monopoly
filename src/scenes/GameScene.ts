@@ -11,7 +11,7 @@ import { PlayerSelectionOverlay } from '../ui/PlayerSelectionOverlay';
 import { APP_VERSION } from '../config/version';
 import { preloadPropertyCards } from '../assets/propertyCards';
 
-const PANEL_WIDTH = 600;
+const PANEL_WIDTH = 300;
 const PANEL_MARGIN = 40;
 
 interface SceneData {
@@ -82,7 +82,7 @@ export default class GameScene extends Phaser.Scene {
     this.add
       .text(12, 12, `v${APP_VERSION}`, {
         fontFamily: 'sans-serif',
-        fontSize: '40px',
+        fontSize: '15px',
         color: '#4a4a4a98'
       })
       .setOrigin(0, 0)
