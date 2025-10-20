@@ -10,6 +10,7 @@ import { InfoPanel } from '../ui/InfoPanel';
 import { PlayerSelectionOverlay } from '../ui/PlayerSelectionOverlay';
 import { APP_VERSION } from '../config/version';
 import { preloadPropertyCards } from '../assets/propertyCards';
+import { PlayerManager } from '../board/PlayerManager';
 
 const PANEL_WIDTH = 300;
 const PANEL_MARGIN = 40;
@@ -30,6 +31,8 @@ export default class GameScene extends Phaser.Scene {
   private infoPanel!: InfoPanel;
 
   private tileHoverPreview!: TileHoverPreview;
+
+  private playerManager!: PlayerManager;
 
   private currentTile: Tile | null = null;
 
@@ -60,6 +63,9 @@ export default class GameScene extends Phaser.Scene {
       0,
       this.totalPlayers
     );
+
+    // Inicializar PlayerManager
+    this.playerManager = new PlayerManager();
 
     const metrics = computeBoardMetrics(
       this.scale.width,
@@ -144,7 +150,12 @@ export default class GameScene extends Phaser.Scene {
 
     this.currentTile = tile;
     this.activeTileIndex = index;
+    
+    // Processar transações de dinheiro baseadas no tile
+    this.processTileTransaction(tile);
+    
     this.updateActivePlayerInfo();
+    this.updateMoneyDisplay();
   }
 
   private handleDiceResult(dieOne: number, dieTwo: number): void {
@@ -184,6 +195,9 @@ export default class GameScene extends Phaser.Scene {
 
     this.humanPlayerCount = Phaser.Math.Clamp(this.humanPlayerCount, 0, normalizedCount);
 
+    // Inicializar PlayerManager
+    this.playerManager.initializePlayers(normalizedCount, this.humanPlayerCount);
+
     this.tokenController.initializePlayers(normalizedCount, options);
     this.playersReady = normalizedCount > 0;
     this.activePlayerIndex = Math.min(
@@ -192,6 +206,9 @@ export default class GameScene extends Phaser.Scene {
     );
     this.currentTile = this.tokenController.getActiveTile();
     this.activeTileIndex = this.tokenController.getActiveTileIndex();
+
+    // Atualizar display de dinheiro
+    this.updateMoneyDisplay();
 
     this.handleTurnStart();
   }
@@ -202,6 +219,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     this.activePlayerIndex = this.tokenController.advanceToNextPlayer();
+    this.playerManager.setActivePlayerIndex(this.activePlayerIndex);
+    this.updateMoneyDisplay();
     this.handleTurnStart();
   }
 
@@ -307,5 +326,44 @@ export default class GameScene extends Phaser.Scene {
   private clearAutoRollTimer(): void {
     this.autoRollTimer?.remove(false);
     this.autoRollTimer = null;
+  }
+
+  private updateMoneyDisplay(): void {
+    if (this.infoPanel && this.playerManager) {
+      this.infoPanel.updateMoneyDisplay(
+        this.playerManager.getPlayers(),
+        this.activePlayerIndex
+      );
+    }
+  }
+
+  private processTileTransaction(tile: Tile): void {
+    if (!this.playerManager) return;
+
+    const playerIndex = this.activePlayerIndex;
+
+    switch (tile.type) {
+      case 'go':
+        // Jogador recebe dinheiro ao passar pelo Go
+        this.playerManager.addMoney(playerIndex, tile.payout);
+        break;
+        
+      case 'tax':
+      case 'luxury-tax':
+        // Jogador paga imposto
+        this.playerManager.subtractMoney(playerIndex, tile.amount);
+        break;
+        
+      case 'property':
+      case 'railroad':
+      case 'utility':
+        // Por enquanto, apenas mostrar o preço (compra será implementada depois)
+        // this.playerManager.subtractMoney(playerIndex, tile.cost);
+        break;
+        
+      default:
+        // Outros tiles não afetam dinheiro diretamente
+        break;
+    }
   }
 }
