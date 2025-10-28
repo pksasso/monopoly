@@ -349,12 +349,20 @@ export default class GameScene extends Phaser.Scene {
         break;
         
       case 'tax':
+        // Jogador paga $ 200 de imposto (não estaremos trabalhando com a regra de 10%
+        this.playerManager.subtractMoney(playerIndex, 200);
+        break;
+
       case 'luxury-tax':
         // Jogador paga imposto
         this.playerManager.subtractMoney(playerIndex, tile.amount);
         break;
         
       case 'property':
+        /* Existem vários tipos de  taxas para propriedade: Propriedade comum ( sem casa ou hotel),
+        se o jogador tem todas as propriedades da mesma cor, se tem casa ou hotel na propriedade)
+        */
+        
       case 'railroad':
       case 'utility':
         // Por enquanto, apenas mostrar o preço (compra será implementada depois)

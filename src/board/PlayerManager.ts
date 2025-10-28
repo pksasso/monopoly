@@ -1,14 +1,22 @@
+import { arrayBuffer } from "node:stream/consumers";
+import * as Tile from '../data/tiles'; 
+import * as Token from '../board/TokenController';
+
 export interface Player {
   id: number;
   name: string;
   money: number;
   color: number;
   isHuman: boolean;
+  properties: Set<number>; // conjunto com os ids dos tiles comprados
+
 }
 
 export class PlayerManager {
   private players: Player[] = [];
   private activePlayerIndex = 0;
+  private tile = Tile.MONOPOLY_TILES; 
+  private owner = new Set();
 
   initializePlayers(playerCount: number, humanPlayerCount: number): void {
     this.players = [];
@@ -19,7 +27,8 @@ export class PlayerManager {
         name: `Jogador ${i + 1}`,
         money: 1500, // Valor inicial do Monopoly
         color: this.getPlayerColor(i),
-        isHuman: i < humanPlayerCount
+        isHuman: i < humanPlayerCount,
+        properties: new Set(),
       });
     }
     
@@ -78,6 +87,27 @@ export class PlayerManager {
   formatMoney(amount: number): string {
     return `R$ ${amount.toLocaleString('pt-BR')}`;
   }
+
+ buyTile(playerId: number, tileId: number ): boolean {
+  const player = this.players.find(p =>p.id === playerId);
+  const tile = this.tile.find(t => t.id === tileId);  
+  
+  if(!player || !tile){
+      return false; 
+    }else{
+       if (tile.type ==='property'&& !tile.owner){
+          if(player.money >= tile.cost){
+            player.money -= tile.cost;
+            tile.owner = player.id;
+            player.properties.add(tileId);
+            
+          }
+       }
+    }
+    return true;
+ }
+
+   
 }
 
 
