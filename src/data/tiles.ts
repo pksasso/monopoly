@@ -16,6 +16,7 @@ interface BaseTile {
   name: string;
   type: TileType;
   displayColor: number;
+
 }
 
 export interface PropertyTile extends BaseTile {
@@ -32,7 +33,7 @@ export interface PropertyTile extends BaseTile {
     house4: number;
     hotel: number;
   };
-  owner: number; // essa flag indica se a propriedade já foi comprada ; true -> com dono / false -> sem dono
+  owner: number |null ; // essa flag indica se a propriedade já foi comprada ; true -> com dono / false -> sem dono
 
 }
 
@@ -115,7 +116,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 250
     },
     displayColor: 0x955235,
-    owner: false,
+    owner: 0
   },
   {
     id: 2,
@@ -141,7 +142,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 450
     },
     displayColor: 0x955235,
-    owner: false,
+    owner: 0,
   },
   {
     id: 4,
@@ -182,7 +183,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 550
     },
     displayColor: 0xAAE0FA,
-    owner: false,
+    owner: 0,
   },
   {
     id: 7,
@@ -208,7 +209,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 550
     },
     displayColor: 0xAAE0FA,
-    owner: false,
+    owner: 0,
   },
   {
     id: 9,
@@ -227,7 +228,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 600
     },
     displayColor: 0xAAE0FA,
-    owner: false,
+    owner: 0,
   },
   {
     id: 10,
@@ -253,7 +254,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 750
     },
     displayColor: 0xD93A96,
-    owner: false,
+    owner: 0,
   },
   {
     id: 12,
@@ -285,7 +286,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 750
     },
     displayColor: 0xD93A96,
-    owner: false,
+    owner: 0,
   },
   {
     id: 14,
@@ -304,7 +305,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 900
     },
     displayColor: 0xD93A96,
-    owner: false,
+    owner: 0,
   },
   {
     id: 15,
@@ -336,7 +337,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 950
     },
     displayColor: 0xF7941D,
-    owner: false,
+    owner: 0,
   },
   {
     id: 17,
@@ -362,7 +363,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 950
     },
     displayColor: 0xF7941D,
-    owner: false,
+    owner: 0,
   },
   {
     id: 19,
@@ -381,7 +382,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 1000
     },
     displayColor: 0xF7941D,
-    owner: false,
+    owner: 0,
   },
   {
     id: 20,
@@ -407,7 +408,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 1050
     },
     displayColor: 0xF11C26,
-    owner: false,
+    owner: 0,
   },
   {
     id: 22,
@@ -433,7 +434,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 1050
     },
     displayColor: 0xF11C26,
-    owner: false,
+    owner: 0,
   },
   {
     id: 24,
@@ -452,7 +453,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 1100
     },
     displayColor: 0xF11C26,
-    owner: false,
+    owner: 0,
   },
   {
     id: 25,
@@ -484,7 +485,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 1150
     },
     displayColor: 0xFEF200,
-    owner: false,
+    owner: 0,
   },
   {
     id: 27,
@@ -503,7 +504,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 1150
     },
     displayColor: 0xFEF200,
-    owner: false,
+    owner: 0,
   },
   {
     id: 28,
@@ -535,7 +536,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 1200
     },
     displayColor: 0xFEF200,
-    owner: false,
+    owner: 0,
   },
   {
     id: 30,
@@ -561,7 +562,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 1275
     },
     displayColor: 0x1FB25A,
-    owner: false,
+    owner: 0,
   },
   {
     id: 32,
@@ -580,7 +581,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 1275
     },
     displayColor: 0x1FB25A,
-    owner: false,
+    owner: 0,
   },
   {
     id: 33,
@@ -606,7 +607,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 1400
     },
     displayColor: 0x1FB25A,
-    owner: false,
+    owner: 0,
   },
   {
     id: 35,
@@ -645,7 +646,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 1500
     },
     displayColor: 0x0072BB,
-    owner: false,
+    owner: 0,
   },
   {
     id: 38,
@@ -672,7 +673,7 @@ export const MONOPOLY_TILES: Tile[] = [
       hotel: 2000
     },
     displayColor: 0x0072BB,
-    owner: false,
+    owner: 0,
   }
 ];
 
