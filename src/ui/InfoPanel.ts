@@ -85,15 +85,19 @@ export class InfoPanel {
       const y = startY + (index * verticalSpacing);
       
       // Círculo colorido do jogador
-      const circle = this.scene.add.circle(x - 40, y, 12, player.color);
-      circle.setStrokeStyle(3, 0x0b3b2e, 1);
+      const tokenKey = `token-${index % 4}`; 
+
+      // Criar o Sprite do jogador
+      const icon = this.scene.add.sprite(x - 40, y, tokenKey);
+      icon.setOrigin(0.5);
+      icon.setScale(0.22);
       
       // Número do jogador
       const playerNumber = this.scene.add.text(x - 40, y, `${index + 1}`, {
         fontFamily: 'sans-serif',
-        fontSize: '12px',
-        color: '#ffffff'
-      }).setOrigin(0.5);
+        fontSize: '1px',
+        color: '#0b3b2e',
+      }).setOrigin(0.5).setDepth(10);
       
       // Nome do jogador
       const playerName = this.scene.add.text(x - 20, y - 8, player.name, {
@@ -111,12 +115,11 @@ export class InfoPanel {
       
       // Destacar jogador ativo
       if (index === activePlayerIndex) {
-        circle.setStrokeStyle(4, 0xff0000, 1);
         playerName.setStyle({ color: '#ff0000' });
         moneyText.setStyle({ color: '#ff0000' });
       }
       
-      this.moneyDisplay.add([circle, playerNumber, playerName, moneyText]);
+      this.moneyDisplay.add([icon, playerNumber, playerName, moneyText]);
     });
   }
 }

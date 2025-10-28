@@ -12,7 +12,7 @@ interface TokenControllerConfig {
 
 interface PlayerToken {
   id: number;
-  token: Phaser.GameObjects.Arc;
+  token: Phaser.GameObjects.Sprite;
   tileIndex: number;
   color: number;
 }
@@ -59,16 +59,15 @@ export class TokenController {
     this.players = new Array(playerCount).fill(null).map((_, index) => {
       const tileIndex = options.tileIndices?.[index] ?? 0;
       const position = this.getTokenCoordinates(tileIndex, index, playerCount);
-
-      const token = this.scene.add.circle(
+      const tokenKey = `token-${index % PLAYER_COLORS.length}`
+      const token = this.scene.add.sprite(
         position.x,
         position.y,
-        this.tileSize * 0.18,
+        tokenKey,
         PLAYER_COLORS[index % PLAYER_COLORS.length]
       );
 
-      token.setStrokeStyle(3, 0x0b3b2e, 1);
-
+      token.setScale(0.4)
       return {
         id: index,
         token,
@@ -180,7 +179,8 @@ export class TokenController {
   private updateTokenStyles(): void {
     this.players.forEach((player, index) => {
       const isActive = index === this.activePlayerIndex;
-      player.token.setStrokeStyle(isActive ? 4 : 3, 0x0b3b2e, 1);
+      player.token.setAlpha(isActive ? 1.0 : 0.7);
+      player.token.setScale(isActive ? 0.45 : 0.4);
       player.token.setDepth(isActive ? 2 : 1);
 
       const tilePosition = this.getTokenCoordinates(player.tileIndex, index, this.players.length);

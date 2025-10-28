@@ -1,5 +1,9 @@
 import Phaser from 'phaser';
 import boardTexture from '../assets/board.png';
+import token0Texture from '../assets/token-0.png';
+import token1Texture from '../assets/token-1.png';
+import token2Texture from '../assets/token-2.png';
+import token3Texture from '../assets/token-3.png';
 import { MONOPOLY_TILES, Tile } from '../data/tiles';
 import { BoardRenderer } from '../board/BoardRenderer';
 import { TokenController } from '../board/TokenController';
@@ -54,6 +58,10 @@ export default class GameScene extends Phaser.Scene {
 
   preload(): void {
     this.load.image('board', boardTexture);
+    this.load.image('token-0', token0Texture); 
+    this.load.image('token-1', token1Texture);
+    this.load.image('token-2', token2Texture);
+    this.load.image('token-3', token3Texture);
     preloadPropertyCards(this.load, MONOPOLY_TILES);
   }
 
