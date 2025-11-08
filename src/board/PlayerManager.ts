@@ -71,7 +71,7 @@ export class PlayerManager {
   }
 
   getPlayerColor(index: number): number {
-    const colors = [0x1e6f5c, 0xd1495b, 0x3f88c5, 0xf6ae2d];
+    const colors = [0x7B68EE, 0xABC703, 0xFFC266, 0xCC0000];
     return colors[index % colors.length];
   }
 
