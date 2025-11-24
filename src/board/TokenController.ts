@@ -123,6 +123,34 @@ export class TokenController {
     });
   }
 
+  moveActivePlayerToTile(tileIndex: number, onComplete: () => void): void {
+    const player = this.players[this.activePlayerIndex];
+    if (!player) {
+      onComplete();
+      return;
+    }
+
+    const normalizedIndex = Phaser.Math.Wrap(tileIndex, 0, this.tilePositions.length);
+    const nextPosition = this.getTokenCoordinates(normalizedIndex, this.activePlayerIndex, this.players.length);
+
+    this.scene.tweens.add({
+      targets: player.token,
+      x: nextPosition.x,
+      y: nextPosition.y,
+      duration: 320,
+      ease: 'Sine.easeInOut',
+      onComplete: () => {
+        player.tileIndex = normalizedIndex;
+        this.onPlayerTileChanged(
+          this.activePlayerIndex,
+          this.tiles[player.tileIndex],
+          player.tileIndex
+        );
+        onComplete();
+      }
+    });
+  }
+
   advanceToNextPlayer(): number {
     if (!this.players.length) {
       return 0;
