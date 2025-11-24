@@ -35,6 +35,7 @@ export class PlayerManager {
     this.activePlayerIndex = 0;
   }
 
+
   getPlayers(): Player[] {
     return [...this.players];
   }

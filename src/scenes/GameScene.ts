@@ -359,9 +359,39 @@ export default class GameScene extends Phaser.Scene {
         break;
         
       case 'property':
-        /* Existem vários tipos de  taxas para propriedade: Propriedade comum ( sem casa ou hotel),
-        se o jogador tem todas as propriedades da mesma cor, se tem casa ou hotel na propriedade)
-        */
+
+        let choice = window.prompt("Selecione uma das opções: 1- Comprar |2- Vender para outro jogador |3- Vender para o banco |4- Pagar aluguel |5- Troca de propriedade")
+        switch(choice){
+          case '1':  // Comprar propriedade comum (casa simples),
+            if(!tile.owner  && this.currentTile?.id == tile.id){
+              this.playerManager.buyTile(this.activePlayerIndex, this.currentTile.id);
+            }else{
+              window.alert("Essa propriedade não pode ser comprada!");
+            }
+            break;
+          case '2': // Pagar aluguel
+            if(tile.owner == this.playerManager.)
+            break;
+          case '3': // Vender propriedade para outro player
+            break;
+          case '4': // Vender propriedade para o banco
+            break;
+          case '5': // Trocar propriedade
+            break;
+          default:
+            break;
+        }
+        // Comprar propriedade comum (casa simples),
+        if(!tile.owner  && this.currentTile?.id == tile.id){
+          this.playerManager.buyTile(this.activePlayerIndex, this.currentTile.id);
+        }
+        // Pagar aluguel para uma propriedade comum (casa simples)
+        if(tile.owner && this.currentTile?.id == tile.id ){
+          // implementar função de aluguel
+        }
+
+        //Para vender uma propriedade
+        if()
         
       case 'railroad':
       case 'utility':
