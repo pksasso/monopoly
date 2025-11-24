@@ -4,7 +4,7 @@ import token0Texture from '../assets/token-0.png';
 import token1Texture from '../assets/token-1.png';
 import token2Texture from '../assets/token-2.png';
 import token3Texture from '../assets/token-3.png';
-import { MONOPOLY_TILES, Tile } from '../data/tiles';
+import { MONOPOLY_TILES, Tile, GoTile } from '../data/tiles';
 import { BoardRenderer } from '../board/BoardRenderer';
 import { TokenController } from '../board/TokenController';
 import { TileHoverPreview } from '../board/TileHoverPreview';
@@ -55,6 +55,13 @@ export default class GameScene extends Phaser.Scene {
   private autoRollTimer: Phaser.Time.TimerEvent | null = null;
 
   private playerSelectionOverlay?: PlayerSelectionOverlay;
+
+  private readonly jailTileIndex = MONOPOLY_TILES.findIndex((tile) => tile.type === 'jail');
+
+  private readonly goPayoutAmount =
+    (MONOPOLY_TILES.find((tile) => tile.type === 'go') as GoTile | undefined)?.payout ?? 200;
+
+  private readonly jailFineAmount = 50;
 
   preload(): void {
     this.load.image('board', boardTexture);
@@ -158,27 +165,203 @@ export default class GameScene extends Phaser.Scene {
 
     this.currentTile = tile;
     this.activeTileIndex = index;
-    
-    // Processar transações de dinheiro baseadas no tile
-    this.processTileTransaction(tile);
-    
     this.updateActivePlayerInfo();
-    this.updateMoneyDisplay();
   }
 
   private handleDiceResult(dieOne: number, dieTwo: number): void {
-    if (!this.playersReady) {
+    if (!this.playersReady || !this.playerManager) {
       return;
     }
 
-    const steps = dieOne + dieTwo;
     this.clearAutoRollTimer();
-    this.isMoving = true;
+    const playerIndex = this.activePlayerIndex;
 
+    if (this.playerManager.isPlayerInJail(playerIndex)) {
+      this.handleJailRoll(dieOne, dieTwo);
+      return;
+    }
+
+    this.handleNormalRoll(dieOne, dieTwo);
+  }
+
+  private handleNormalRoll(dieOne: number, dieTwo: number): void {
+    if (!this.playerManager) {
+      return;
+    }
+
+    const playerIndex = this.activePlayerIndex;
+    const isDouble = dieOne === dieTwo;
+
+    if (isDouble) {
+      const count = this.playerManager.incrementConsecutiveDoubles(playerIndex);
+      if (count >= 3) {
+        this.playerManager.resetConsecutiveDoubles(playerIndex);
+        this.sendActivePlayerToJail('three-doubles');
+        return;
+      }
+    } else {
+      this.playerManager.resetConsecutiveDoubles(playerIndex);
+    }
+
+    this.moveActivePlayerAndResolve(dieOne + dieTwo, {
+      isDouble,
+      allowExtraTurnOnDouble: true
+    });
+  }
+
+  private handleJailRoll(dieOne: number, dieTwo: number): void {
+    if (!this.playerManager) {
+      return;
+    }
+
+    const playerIndex = this.activePlayerIndex;
+    const isDouble = dieOne === dieTwo;
+
+    if (isDouble) {
+      this.playerManager.releasePlayerFromJail(playerIndex);
+      this.moveActivePlayerAndResolve(dieOne + dieTwo, {
+        isDouble,
+        allowExtraTurnOnDouble: false
+      });
+      return;
+    }
+
+    const turnsServed = this.playerManager.incrementJailTurns(playerIndex);
+    let unableToPayFine = false;
+
+    if (turnsServed >= 3) {
+      const paid = this.playerManager.subtractMoney(playerIndex, this.jailFineAmount);
+      if (paid) {
+        this.playerManager.releasePlayerFromJail(playerIndex);
+        this.updateMoneyDisplay();
+        this.moveActivePlayerAndResolve(dieOne + dieTwo, {
+          isDouble: false,
+          allowExtraTurnOnDouble: false
+        });
+        return;
+      }
+
+      // Jogador não conseguiu pagar, reinicia contagem e permanece preso.
+      this.playerManager.resetJailTurns(playerIndex);
+      unableToPayFine = true;
+    }
+
+    this.handlePlayerStayedInJail(unableToPayFine);
+  }
+
+  private moveActivePlayerAndResolve(
+    steps: number,
+    options: { isDouble: boolean; allowExtraTurnOnDouble: boolean }
+  ): void {
+    if (steps <= 0) {
+      this.resolveLandingAfterMovement({
+        passedGo: false,
+        isDouble: options.isDouble,
+        allowExtraTurnOnDouble: options.allowExtraTurnOnDouble
+      });
+      return;
+    }
+
+    const startIndex = this.activeTileIndex;
+    const passedGo = this.didPassGo(startIndex, steps);
+
+    this.isMoving = true;
     this.tokenController.moveActivePlayerBySteps(steps, () => {
       this.isMoving = false;
+      this.resolveLandingAfterMovement({
+        passedGo,
+        isDouble: options.isDouble,
+        allowExtraTurnOnDouble: options.allowExtraTurnOnDouble
+      });
+    });
+  }
+
+  private resolveLandingAfterMovement(options: {
+    passedGo: boolean;
+    isDouble: boolean;
+    allowExtraTurnOnDouble: boolean;
+  }): void {
+    if (!this.playerManager) {
+      return;
+    }
+
+    if (options.passedGo) {
+      this.playerManager.addMoney(this.activePlayerIndex, this.goPayoutAmount);
+    }
+
+    const landedTile = this.currentTile ?? this.tokenController.getActiveTile();
+    if (landedTile) {
+      this.processTileTransaction(landedTile, { skipGoPayout: options.passedGo });
+    }
+
+    this.updateMoneyDisplay();
+
+    if (landedTile?.type === 'go-to-jail') {
+      this.sendActivePlayerToJail('go-to-jail');
+      return;
+    }
+
+    if (options.allowExtraTurnOnDouble && options.isDouble) {
+      this.handleTurnStart();
+    } else {
+      this.advanceTurn();
+    }
+  }
+
+  private didPassGo(startIndex: number, steps: number): boolean {
+    const totalTiles = MONOPOLY_TILES.length;
+    if (totalTiles === 0) {
+      return false;
+    }
+
+    const targetIndex = (startIndex + steps) % totalTiles;
+    return targetIndex < startIndex;
+  }
+
+  private sendActivePlayerToJail(reason: 'go-to-jail' | 'three-doubles'): void {
+    if (!this.playerManager || this.jailTileIndex < 0) {
+      this.advanceTurn();
+      return;
+    }
+
+    const playerIndex = this.activePlayerIndex;
+    this.playerManager.sendPlayerToJail(playerIndex);
+
+    this.isMoving = true;
+    this.tokenController.moveActivePlayerToTile(this.jailTileIndex, () => {
+      this.isMoving = false;
+      this.currentTile = this.tokenController.getActiveTile();
+      this.updateActivePlayerInfo();
+      this.updateMoneyDisplay();
+
+      const playerLabel = `Jogador ${playerIndex + 1}`;
+      const reasonLabel =
+        reason === 'three-doubles'
+          ? 'tirou três duplas seguidas e foi enviado para a prisão.'
+          : 'foi enviado diretamente para a prisão.';
+      this.infoPanel.updateDescription(`${playerLabel} ${reasonLabel}`);
+
       this.advanceTurn();
     });
+  }
+
+  private handlePlayerStayedInJail(wasBroke = false): void {
+    if (!this.playerManager) {
+      return;
+    }
+
+    const player = this.playerManager.getPlayer(this.activePlayerIndex);
+    if (player) {
+      const attemptsLeft = Math.max(0, 3 - player.jailTurnsServed);
+      const attemptLabel = wasBroke
+        ? 'Sem dinheiro suficiente para pagar a fiança.'
+        : `Ainda restam ${attemptsLeft} tentativa(s) para tirar dupla antes da fiança.`;
+      this.infoPanel.updateDescription(
+        `Jogador ${player.id + 1} permanece na prisão. ${attemptLabel}`
+      );
+    }
+
+    this.advanceTurn();
   }
 
   private handleResize(): void {
@@ -226,8 +409,10 @@ export default class GameScene extends Phaser.Scene {
       return;
     }
 
+    const previousPlayer = this.activePlayerIndex;
     this.activePlayerIndex = this.tokenController.advanceToNextPlayer();
     this.playerManager.setActivePlayerIndex(this.activePlayerIndex);
+    this.playerManager.resetConsecutiveDoubles(previousPlayer);
     this.updateMoneyDisplay();
     this.handleTurnStart();
   }
@@ -260,6 +445,15 @@ export default class GameScene extends Phaser.Scene {
   private formatTileMessage(tile: Tile): string {
     const roleLabel = this.isCurrentPlayerHuman() ? 'Humano' : 'Bot';
     const baseMessage = `Jogador ${this.activePlayerIndex + 1} (${roleLabel}) está em ${tile.name}`;
+
+    const player = this.playerManager?.getPlayer(this.activePlayerIndex);
+    if (player?.isInJail) {
+      const attempts = player.jailTurnsServed;
+      const attemptLabel =
+        attempts === 0 ? 'Ainda não tentou sair.' : `${attempts} tentativa(s) usadas para sair.`;
+      return `${baseMessage}\nNa prisão • ${attemptLabel}`;
+    }
+
     const details = this.getTileDetails(tile);
     return details ? `${baseMessage}\n${details}` : baseMessage;
   }
@@ -306,6 +500,7 @@ export default class GameScene extends Phaser.Scene {
       return;
     }
 
+    this.playerManager.setActivePlayerIndex(this.activePlayerIndex);
     this.clearAutoRollTimer();
     this.applyActivePlayerTheme();
 
@@ -316,7 +511,14 @@ export default class GameScene extends Phaser.Scene {
     this.updateActivePlayerInfo();
 
     const isHuman = this.isCurrentPlayerHuman();
-    const label = isHuman ? 'Humano: Jogar Dados' : 'Bot: Aguardando';
+    const isInJail = this.playerManager.isPlayerInJail(this.activePlayerIndex);
+    const label = isInJail
+      ? isHuman
+        ? 'Na prisão: Jogar Dados'
+        : 'Bot preso: aguardando'
+      : isHuman
+        ? 'Humano: Jogar Dados'
+        : 'Bot: Aguardando';
     this.dicePanel.setManualControl(isHuman, label);
 
     if (!isHuman) {
@@ -345,15 +547,17 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  private processTileTransaction(tile: Tile): void {
+  private processTileTransaction(tile: Tile, options: { skipGoPayout?: boolean } = {}): void {
     if (!this.playerManager) return;
 
     const playerIndex = this.activePlayerIndex;
 
     switch (tile.type) {
       case 'go':
-        // Jogador recebe dinheiro ao passar pelo Go
-        this.playerManager.addMoney(playerIndex, tile.payout);
+        if (!options.skipGoPayout) {
+          // Jogador recebe dinheiro ao passar ou pousar no Go
+          this.playerManager.addMoney(playerIndex, tile.payout);
+        }
         break;
         
       case 'tax':
