@@ -345,33 +345,161 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  private processTileTransaction(tile: Tile): void {
-    if (!this.playerManager) return;
+   private processTileTransaction(tile: Tile): void {
+  const playerIndex = this.activePlayerIndex;
 
-    const playerIndex = this.activePlayerIndex;
+  switch (tile.type) {
+    case 'go':
+      this.playerManager.addMoney(playerIndex, tile.payout);
+      return;
 
-    switch (tile.type) {
-      case 'go':
-        // Jogador recebe dinheiro ao passar pelo Go
-        this.playerManager.addMoney(playerIndex, tile.payout);
-        break;
-        
-      case 'tax':
-      case 'luxury-tax':
-        // Jogador paga imposto
-        this.playerManager.subtractMoney(playerIndex, tile.amount);
-        break;
-        
-      case 'property':
-      case 'railroad':
-      case 'utility':
-        // Por enquanto, apenas mostrar o preço (compra será implementada depois)
-        // this.playerManager.subtractMoney(playerIndex, tile.cost);
-        break;
-        
-      default:
-        // Outros tiles não afetam dinheiro diretamente
-        break;
-    }
+    case 'tax':
+      this.playerManager.subtractMoney(playerIndex, tile.amount ?? 200);
+      return;
+
+    case 'luxury-tax':
+      this.playerManager.subtractMoney(playerIndex, tile.amount);
+      return;
+
+    case 'property':
+      this.handlePropertyMenu(tile);
+      return;
+
+    case 'railroad':
+    case 'utility':
+      // (implementação futura: compra, aluguel etc.)
+      return;
+
+    default:
+      return;
   }
+}
+
+  private handlePropertyMenu(tile: Tile): void {
+  const playerIndex = this.activePlayerIndex;
+  const owner = tile.owner;
+
+  const choice = window.prompt(
+    "Selecione uma opção:\n" +
+    "1- Comprar\n" +
+    "2- Pagar aluguel\n" +
+    "3- Vender para outro jogador\n" +
+    "4- Vender para o banco\n" +
+    "5- Trocar propriedade\n"
+  );
+
+  switch (choice) {
+    case '1': // Comprar
+      if (!owner) {
+        if (window.confirm("Deseja comprar esta propriedade?")) {
+          this.playerManager.buyTile(playerIndex, tile.id);
+        }
+      } else {
+        window.alert("Esta propriedade já tem dono.");
+      }
+      break;
+
+    case '2': // Pagar aluguel
+      if (owner != null && owner !== playerIndex) {
+        this.playerManager.payRent(playerIndex, tile);
+      } else {
+        window.alert("Ninguém é dono desta propriedade.");
+      }
+      break;
+
+    case '3': // Venda para outro jogador
+      this.handleSellToPlayer(tile);
+      break;
+
+    case '4': // Venda ao banco
+      if (owner === playerIndex) {
+        if (window.confirm("Confirmar venda ao banco?")) {
+          this.playerManager.sellToBank(playerIndex, tile.id);
+        }
+      } else {
+        window.alert("Você não é o dono desta propriedade.");
+      }
+      break;
+
+    case '5': // Troca
+      this.handleTrade(tile);
+      break;
+
+    default:
+      window.alert("Opção inválida!");
+  }
+
+}
+
+private handleTrade(tile: Tile): void {
+  const playerId = this.activePlayerIndex;
+  const count = this.playerManager.getPlayerCount();
+
+  const otherInput = window.prompt(`Trocar com qual jogador? (1-${count})`);
+  if (!otherInput) return;
+
+  const otherId = parseInt(otherInput) - 1;
+  if (otherId === playerId || otherId < 0 || otherId >= count) {
+    window.alert("Jogador inválido.");
+    return;
+  }
+
+  const myProp = Number(window.prompt("ID da sua propriedade:"));
+  const theirProp = Number(window.prompt("ID da propriedade do outro jogador:"));
+
+  if (isNaN(myProp) || isNaN(theirProp)) {
+    window.alert("IDs inválidos.");
+    return;
+  }
+
+  const success = this.playerManager.tradeProperties(playerId, otherId, myProp.id, theirProp.id);
+  if (success) window.alert("Troca realizada!");
+}
+
+private handleSellToPlayer(tile: Tile): void {
+  const sellerId = this.activePlayerIndex;
+
+  const totalPlayers = this.playerManager.getPlayerCount();
+  if (totalPlayers <= 1) {
+    window.alert("Não há outros jogadores para vender.");
+    return;
+  }
+
+  // Escolher comprador
+  const buyerInput = window.prompt(`Digite o número do jogador comprador (1-${totalPlayers}):`);
+  if (!buyerInput) return;
+
+  const buyerId = parseInt(buyerInput, 10) - 1;
+
+  if (isNaN(buyerId) || buyerId < 0 || buyerId >= totalPlayers) {
+    window.alert("Jogador inválido.");
+    return;
+  }
+
+  if (buyerId === sellerId) {
+    window.alert("Você não pode vender uma propriedade para si mesmo.");
+    return;
+  }
+
+  // Confirmar valor da venda
+  const priceInput = window.prompt("Digite o valor da venda:");
+  if (!priceInput) return;
+
+  const salePrice = Number(priceInput);
+
+  if (isNaN(salePrice) || salePrice <= 0) {
+    window.alert("Valor inválido.");
+    return;
+  }
+
+  // Executar venda via PlayerManager
+  const success = this.playerManager.sellPlayerTile(sellerId, buyerId, tile.id, salePrice);
+
+  if (success) {
+    window.alert("Venda concluída com sucesso!");
+  } else {
+    window.alert("Não foi possível realizar a venda.");
+  }
+}
+  
 }

@@ -16,6 +16,7 @@ interface BaseTile {
   name: string;
   type: TileType;
   displayColor: number;
+
 }
 
 export interface PropertyTile extends BaseTile {
@@ -32,7 +33,20 @@ export interface PropertyTile extends BaseTile {
     house4: number;
     hotel: number;
   };
+  owner: number |null ; // essa flag indica se a propriedade já foi comprada ; true -> com dono / false -> sem dono
+
+  houses?: number; //0 a 4
+  hasHotel?: boolean;
 }
+
+export function getHouseCost(propertyId :number ): number | undefined{
+    const tile = MONOPOLY_TILES.find(t => t.id === propertyId);
+    
+    if (tile && tile.type === 'property'){
+      return tile.houseCost;
+    }
+    return undefined;
+  }
 
 export interface RailroadTile extends BaseTile {
   type: 'railroad';
@@ -103,7 +117,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 160,
       hotel: 250
     },
-    displayColor: 0x955235
+    displayColor: 0x955235,
+    owner: 0
   },
   {
     id: 2,
@@ -128,7 +143,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 320,
       hotel: 450
     },
-    displayColor: 0x955235
+    displayColor: 0x955235,
+    owner: 0,
   },
   {
     id: 4,
@@ -149,7 +165,8 @@ export const MONOPOLY_TILES: Tile[] = [
       three: 100,
       four: 200
     },
-    displayColor: 0x222222
+    displayColor: 0x222222,
+    
   },
   {
     id: 6,
@@ -167,7 +184,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 400,
       hotel: 550
     },
-    displayColor: 0xAAE0FA
+    displayColor: 0xAAE0FA,
+    owner: 0,
   },
   {
     id: 7,
@@ -192,7 +210,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 400,
       hotel: 550
     },
-    displayColor: 0xAAE0FA
+    displayColor: 0xAAE0FA,
+    owner: 0,
   },
   {
     id: 9,
@@ -210,7 +229,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 450,
       hotel: 600
     },
-    displayColor: 0xAAE0FA
+    displayColor: 0xAAE0FA,
+    owner: 0,
   },
   {
     id: 10,
@@ -235,7 +255,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 625,
       hotel: 750
     },
-    displayColor: 0xD93A96
+    displayColor: 0xD93A96,
+    owner: 0,
   },
   {
     id: 12,
@@ -266,7 +287,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 625,
       hotel: 750
     },
-    displayColor: 0xD93A96
+    displayColor: 0xD93A96,
+    owner: 0,
   },
   {
     id: 14,
@@ -284,7 +306,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 700,
       hotel: 900
     },
-    displayColor: 0xD93A96
+    displayColor: 0xD93A96,
+    owner: 0,
   },
   {
     id: 15,
@@ -315,7 +338,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 750,
       hotel: 950
     },
-    displayColor: 0xF7941D
+    displayColor: 0xF7941D,
+    owner: 0,
   },
   {
     id: 17,
@@ -340,7 +364,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 750,
       hotel: 950
     },
-    displayColor: 0xF7941D
+    displayColor: 0xF7941D,
+    owner: 0,
   },
   {
     id: 19,
@@ -358,7 +383,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 800,
       hotel: 1000
     },
-    displayColor: 0xF7941D
+    displayColor: 0xF7941D,
+    owner: 0,
   },
   {
     id: 20,
@@ -383,7 +409,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 875,
       hotel: 1050
     },
-    displayColor: 0xF11C26
+    displayColor: 0xF11C26,
+    owner: 0,
   },
   {
     id: 22,
@@ -408,7 +435,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 875,
       hotel: 1050
     },
-    displayColor: 0xF11C26
+    displayColor: 0xF11C26,
+    owner: 0,
   },
   {
     id: 24,
@@ -426,7 +454,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 925,
       hotel: 1100
     },
-    displayColor: 0xF11C26
+    displayColor: 0xF11C26,
+    owner: 0,
   },
   {
     id: 25,
@@ -457,7 +486,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 975,
       hotel: 1150
     },
-    displayColor: 0xFEF200
+    displayColor: 0xFEF200,
+    owner: 0,
   },
   {
     id: 27,
@@ -475,7 +505,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 975,
       hotel: 1150
     },
-    displayColor: 0xFEF200
+    displayColor: 0xFEF200,
+    owner: 0,
   },
   {
     id: 28,
@@ -506,7 +537,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1025,
       hotel: 1200
     },
-    displayColor: 0xFEF200
+    displayColor: 0xFEF200,
+    owner: 0,
   },
   {
     id: 30,
@@ -531,7 +563,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1100,
       hotel: 1275
     },
-    displayColor: 0x1FB25A
+    displayColor: 0x1FB25A,
+    owner: 0,
   },
   {
     id: 32,
@@ -549,7 +582,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1100,
       hotel: 1275
     },
-    displayColor: 0x1FB25A
+    displayColor: 0x1FB25A,
+    owner: 0,
   },
   {
     id: 33,
@@ -574,7 +608,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1200,
       hotel: 1400
     },
-    displayColor: 0x1FB25A
+    displayColor: 0x1FB25A,
+    owner: 0,
   },
   {
     id: 35,
@@ -612,7 +647,8 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1300,
       hotel: 1500
     },
-    displayColor: 0x0072BB
+    displayColor: 0x0072BB,
+    owner: 0,
   },
   {
     id: 38,
@@ -638,6 +674,11 @@ export const MONOPOLY_TILES: Tile[] = [
       house4: 1700,
       hotel: 2000
     },
-    displayColor: 0x0072BB
+    displayColor: 0x0072BB,
+    owner: 0,
   }
 ];
+
+
+
+
