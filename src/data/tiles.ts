@@ -35,6 +35,8 @@ export interface PropertyTile extends BaseTile {
   };
   owner: number |null ; // essa flag indica se a propriedade já foi comprada ; true -> com dono / false -> sem dono
 
+  houses?: number; //0 a 4
+  hasHotel?: boolean;
 }
 
 export function getHouseCost(propertyId :number ): number | undefined{
